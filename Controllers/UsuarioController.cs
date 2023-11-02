@@ -46,6 +46,35 @@ namespace MeuBancoBackend.Controllers
             }   
         }
 
+        [AllowAnonymous]
+        [HttpPost("Login")]
+        public async Task<ActionResult> Login(LoginDTO login)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest("Objeto inválido");
+
+                var result = _usuarioService.Login(login).Result;
+
+                if (result.Succeeded)
+                {
+                    LoginResponseDTO token = _usuarioService.GerarTokenJwt(login.Email).Result;
+                    return Ok(token);
+                }
+
+                if (result.IsLockedOut)
+                {
+                    return BadRequest("Usuário bloqueado temporiaramente");
+                }
+
+                return BadRequest("Usuário ou Senha incorretos");
+            }
+            catch (Exception)
+            {
+                return BadRequest("Erro ao fazer login");
+            }
+        }
+
 
     }
 }
