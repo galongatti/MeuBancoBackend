@@ -1,5 +1,6 @@
 ﻿using MeuBancoBackend.Context;
-using MeuBancoBackend.NovaPasta;
+using MeuBancoBackend.Extension;
+using MeuBancoBackend.Model;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,10 +17,14 @@ namespace MeuBancoBackend.Configs
             services.AddDbContext<UsuarioDBContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddRoles<IdentityRole>()
+            services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<UsuarioDBContext>()
                 .AddDefaultTokenProviders();
+                
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            });
 
             // JWT
             IConfigurationSection AppSettingSection = configuration.GetSection("AppSettings");
@@ -27,6 +32,10 @@ namespace MeuBancoBackend.Configs
 
             AppSetting appSetting = AppSettingSection.Get<AppSetting>();
             byte[] key = Encoding.ASCII.GetBytes(appSetting.Secret);
+
+            
+
+
 
             services.AddAuthentication(x =>
             {

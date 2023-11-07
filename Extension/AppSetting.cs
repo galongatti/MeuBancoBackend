@@ -1,4 +1,4 @@
-﻿namespace MeuBancoBackend.NovaPasta
+﻿namespace MeuBancoBackend.Extension
 {
     public class AppSetting
     {

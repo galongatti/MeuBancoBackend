@@ -1,10 +1,12 @@
 ﻿using MeuBancoBackend.DTO;
 using MeuBancoBackend.Extension;
+using MeuBancoBackend.Model;
 using MeuBancoBackend.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace MeuBancoBackend.Controllers
 {
@@ -13,10 +15,13 @@ namespace MeuBancoBackend.Controllers
     public class UsuarioController : ControllerBase
     {
         private IUsuarioService _usuarioService;
+        private IOptions<ServicosMensagerias> _options;
 
-        public UsuarioController(IUsuarioService usuarioService) 
+        public UsuarioController(IUsuarioService usuarioService, IOptions<ServicosMensagerias> options) 
         {
             _usuarioService = usuarioService;
+            _options = options;
+
         }
 
         [AllowAnonymous]
@@ -54,11 +59,11 @@ namespace MeuBancoBackend.Controllers
             {
                 if (!ModelState.IsValid) return BadRequest("Objeto inválido");
 
-                var result = _usuarioService.Login(login).Result;
+                var result = await _usuarioService.Login(login);
 
                 if (result.Succeeded)
                 {
-                    LoginResponseDTO token = _usuarioService.GerarTokenJwt(login.Email).Result;
+                    LoginResponseDTO token = await _usuarioService.GerarTokenJwt(login.Email);
                     return Ok(token);
                 }
 
@@ -74,7 +79,6 @@ namespace MeuBancoBackend.Controllers
                 return BadRequest("Erro ao fazer login");
             }
         }
-
 
     }
 }

@@ -1,6 +1,6 @@
 ﻿using MeuBancoBackend.DTO;
 using MeuBancoBackend.Extension;
-using MeuBancoBackend.NovaPasta;
+using MeuBancoBackend.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -86,5 +86,16 @@ namespace MeuBancoBackend.Service
 
         private static long ToUnixEpochDate(DateTime date)
             => (long)Math.Round((date.ToUniversalTime() - new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero)).TotalSeconds);
+
+        public IdentityUser AtualizarUsuario(IdentityUser usuario)
+        {
+             _ = _userManager.UpdateAsync(usuario).Result;
+            return usuario;
+        }
+
+        public IdentityUser BuscarUsuarioPeloId(string id)
+        {
+            return _userManager.FindByIdAsync(id).Result;
+        }
     }
 }
