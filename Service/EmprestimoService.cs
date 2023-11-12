@@ -1,16 +1,25 @@
 using MeuBancoBackend.DTO;
+using MeuBancoBackend.Extension;
 using MeuBancoBackend.Model;
 using MeuBancoBackend.Repository;
+using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MeuBancoBackend.Service
 {
     public class EmprestimoService : IEmprestimoService
     {
         private IEmprestimoRepository _emprestimoRepository;
+        private IOptions<ServicosMensagerias> _options;
 
-        public EmprestimoService(IEmprestimoRepository emprestimoRepository)
+
+        public EmprestimoService(IEmprestimoRepository emprestimoRepository, IOptions<ServicosMensagerias> options)
         {
             _emprestimoRepository = emprestimoRepository;
+            _options = options;
         }
 
         public Emprestimo CadastrarEmprestimo(NovoEmprestimoDTO novoEmprestimo)
@@ -31,9 +40,36 @@ namespace MeuBancoBackend.Service
             return emprestimo;
         }
 
-        public void AnalisarEmprestimo(Emprestimo emprestimo)
+        private void AnalisarEmprestimo(Emprestimo emprestimo)
         {
-            //código do producer enviando mensagem para os consumer
+            ConnectionFactory factory = new();
+            factory.Uri = new Uri(_options.Value.ServicoEmprestimo);
+            factory.ClientProvidedName = "Emprestimo Sender App";
+            EnviarParaAnaliseSERASA(factory, emprestimo);
+
+        }
+
+        private void EnviarParaAnaliseSERASA(ConnectionFactory connectionFactory, Emprestimo emprestimo)
+        {
+
+            IConnection cnn = connectionFactory.CreateConnection();
+            IModel channel = cnn.CreateModel();
+
+            string exchangeName = "SERASAExchange";
+            string routingKey = "Serasa-routing-key";
+            string queueName = "SerasaQueue";
+
+            channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
+            channel.QueueDeclare(queueName, false, false, false, null);
+            channel.QueueBind(queueName, exchangeName, routingKey, null);
+
+            string json = JsonSerializer.Serialize(emprestimo);
+
+            byte[] messageBodyBytes = Encoding.UTF8.GetBytes(json);
+            channel.BasicPublish(exchangeName, routingKey, null, messageBodyBytes);
+
+            channel.Close();
+            cnn.Close();
         }
     }
 }

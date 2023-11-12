@@ -15,12 +15,10 @@ namespace MeuBancoBackend.Controllers
     public class UsuarioController : ControllerBase
     {
         private IUsuarioService _usuarioService;
-        private IOptions<ServicosMensagerias> _options;
 
-        public UsuarioController(IUsuarioService usuarioService, IOptions<ServicosMensagerias> options) 
+        public UsuarioController(IUsuarioService usuarioService) 
         {
             _usuarioService = usuarioService;
-            _options = options;
 
         }
 
