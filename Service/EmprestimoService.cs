@@ -14,6 +14,7 @@ namespace MeuBancoBackend.Service
     {
         private IEmprestimoRepository _emprestimoRepository;
         private IOptions<ServicosMensagerias> _options;
+        private readonly string _clientProvidedName = "Emprestimo Sender App";
 
 
         public EmprestimoService(IEmprestimoRepository emprestimoRepository, IOptions<ServicosMensagerias> options)
@@ -42,17 +43,17 @@ namespace MeuBancoBackend.Service
 
         private void AnalisarEmprestimo(Emprestimo emprestimo)
         {
-            ConnectionFactory factory = new();
-            factory.Uri = new Uri(_options.Value.ServicoEmprestimo);
-            factory.ClientProvidedName = "Emprestimo Sender App";
-            EnviarParaAnaliseSERASA(factory, emprestimo);
+
+            EnviarParaAnaliseSERASA(emprestimo);
 
         }
 
-        private void EnviarParaAnaliseSERASA(ConnectionFactory connectionFactory, Emprestimo emprestimo)
+        private void EnviarParaAnaliseSERASA(Emprestimo emprestimo)
         {
-
-            IConnection cnn = connectionFactory.CreateConnection();
+            ConnectionFactory factory = new();
+            factory.Uri = new Uri(_options.Value.ServicoEmprestimo);
+            factory.ClientProvidedName = "Emprestimo Sender App";
+            IConnection cnn = factory.CreateConnection();
             IModel channel = cnn.CreateModel();
 
             string exchangeName = "SERASAExchange";
