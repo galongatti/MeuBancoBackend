@@ -45,7 +45,33 @@ namespace MeuBancoBackend.Service
         {
 
             EnviarParaAnaliseSERASA(emprestimo);
+            EnviarParaAnaliseCadastro(emprestimo);
 
+        }
+
+        private void EnviarParaAnaliseCadastro(Emprestimo emprestimo)
+        {
+            ConnectionFactory factory = new();
+            factory.Uri = new Uri(_options.Value.ServicoEmprestimo);
+            factory.ClientProvidedName = "Emprestimo Sender App";
+            IConnection cnn = factory.CreateConnection();
+            IModel channel = cnn.CreateModel();
+
+            string exchangeName = "CadastroExchange";
+            string routingKey = "Cadastro-routing-key";
+            string queueName = "CadastroQueue";
+
+            channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
+            channel.QueueDeclare(queueName, false, false, false, null);
+            channel.QueueBind(queueName, exchangeName, routingKey, null);
+
+            string json = JsonSerializer.Serialize(emprestimo);
+
+            byte[] messageBodyBytes = Encoding.UTF8.GetBytes(json);
+            channel.BasicPublish(exchangeName, routingKey, null, messageBodyBytes);
+
+            channel.Close();
+            cnn.Close();
         }
 
         private void EnviarParaAnaliseSERASA(Emprestimo emprestimo)

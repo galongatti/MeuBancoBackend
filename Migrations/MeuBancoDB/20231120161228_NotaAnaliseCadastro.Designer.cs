@@ -4,6 +4,7 @@ using MeuBancoBackend.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeuBancoBackend.Migrations.MeuBancoDB
 {
     [DbContext(typeof(MeuBancoDBContext))]
-    partial class MeuBancoDBContextModelSnapshot : ModelSnapshot
+    [Migration("20231120161228_NotaAnaliseCadastro")]
+    partial class NotaAnaliseCadastro
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,7 +94,7 @@ namespace MeuBancoBackend.Migrations.MeuBancoDB
                     b.Property<int?>("NotaSERASA")
                         .HasColumnType("int");
 
-                    b.Property<int?>("NotaSalario")
+                    b.Property<int?>("NotalSalario")
                         .HasColumnType("INT");
 
                     b.Property<decimal?>("PercentualSalario")
